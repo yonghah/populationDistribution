@@ -1,0 +1,2 @@
+to convert stacked raster to point geometry, use Point sampling tool plugin in QGIS.
+To use this, you need to create point vector layer first using processing tool > Vector Creation > Raster pixels to point

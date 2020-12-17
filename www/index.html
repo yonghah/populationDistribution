@@ -1,0 +1,337 @@
+<html>
+<head>
+<meta charset="utf-8" />
+<title>한국의 인구 분포 변화 2010-2019</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.css' rel='stylesheet' />
+<link href='style.css' rel='stylesheet' />
+</head>
+<body>
+<div id="mySidebar" class="sidebar">
+    <div class="map-overlay top">
+        <div class="map-overlay-inner">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+            <fieldset>
+                <label>대상 연도 선택</label>
+                <select id="select_year_current" name="select_year_current">
+                    <option value="pop2000">2000</option>
+                    <option value="pop2005">2005</option>
+                    <option value="pop2010">2010</option>
+                    <option value="pop2015">2015</option>
+                    <option value="pop2016">2016</option>
+                    <option value="pop2017">2017</option>
+                    <option value="pop2018">2018</option>
+                    <option value="pop2019" selected>2019</option>
+                </select>
+                <label>기준 연도 선택</label>
+                <select id="select_year_reference" name="select_year_reference">
+                    <option value="pop0000">없음</option>
+                    <option value="pop2000" selected>2000</option>
+                    <option value="pop2005">2005</option>
+                    <option value="pop2010">2010</option>
+                    <option value="pop2015">2015</option>
+                    <option value="pop2016">2016</option>
+                    <option value="pop2017">2017</option>
+                    <option value="pop2018">2018</option>
+                    <option value="pop2019">2019</option>
+                </select>
+                <p><label>현재 보이는 영역의 인구 변화: </label><span id="mapview-count"></span></p>
+                <label>바탕 동심원 불투명도</label>
+                <input
+                    id="slider_gridbg_opacity"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value="0.15"
+                />
+                <label>비례 동심원 크기 조정 </label>
+                <input
+                    id="slider_diffMagnify"
+                    type="range"
+                    min="0"
+                    max="3"
+                    step="0.01"
+                    value="1.5"
+                />
+                <label><span id="allowance-value">10</span>% 이하의 변화는 회색으로 표시</label>
+                <input
+                    id="slider_allowance"
+                    type="range"
+                    min="0"
+                    max="50"
+                    step="5"
+                    value="10"
+                />
+            </fieldset>
+            <p> 그리드 인구 데이터 및 시각화 아이디어는 <a href = "https://github.com/vuski/populationDistribution">김승범 박사님의 작업</a>에서 가져온 것입니다. 
+                이 데이터를 가공, 표시하는 과정에서 오류가 있을 수 있습니다. 
+            <a href="https://twitter.com/pathoverlap"> -- @pathoverlap</a></p>
+        </div>
+    </div>
+</div>
+<div id='map'>
+    <button class="openbtn" onclick="openNav()">&#9776; 한국의 인구분포 변화</button>
+</div>
+<script>
+
+mapboxgl.accessToken = 'pk.eyJ1IjoieW9uZ2hhaCIsImEiOiJjaW52MTNlbnQxM2FtdWttM2loYnljeXNvIn0.chjRTLaOQ6oIaPa0r0Ggnw';
+var map = new mapboxgl.Map({
+  container: 'map',
+//   style: 'mapbox://styles/mapbox/light-v10',
+  style: 'mapbox://styles/yonghah/ckisyamx11efv19o84dvqzosh',
+  center: [126.93, 37.49],
+  zoom: 10.5,
+});
+
+var select_yref = document.getElementById('select_year_reference');
+var select_ycur = document.getElementById('select_year_current');
+var slider_gridbg_opacity = document.getElementById('slider_gridbg_opacity');
+var slider_diffMagnify = document.getElementById('slider_diffMagnify');
+var slider_allowance = document.getElementById('slider_allowance');
+
+var year_reference = select_yref.value;
+var year_current   = select_ycur.value;
+var gridbg_opacity = parseFloat(slider_gridbg_opacity.value);
+var allowance = parseInt(slider_allowance.value, 10) /100;
+var diffMagnify = parseFloat(slider_diffMagnify.value);
+
+select_yref.addEventListener('change', function(){
+    year_reference = select_yref.value;
+    map.setPaintProperty(
+        'gridcirclebg', 
+        'circle-color', 
+        makeCircleColorStyle(year_current, year_reference, allowance));
+    map.setPaintProperty(
+        'diffPopulation', 
+        'circle-color', 
+        makeCircleColorStyle(year_current, year_reference, allowance));
+    map.setPaintProperty(
+        'diffPopulation', 
+        'circle-radius', 
+        makeCircleRadiusStyle(year_current, year_reference, diffMagnify));
+    updatePopulation();
+});
+select_ycur.addEventListener('change', function(){
+    year_current = select_ycur.value;
+    map.setPaintProperty(
+        'gridcirclebg', 
+        'circle-color', 
+        makeCircleColorStyle(year_current, year_reference, allowance));
+    map.setPaintProperty(
+        'diffPopulation', 
+        'circle-color', 
+        makeCircleColorStyle(year_current, year_reference, allowance));
+    map.setPaintProperty(
+        'diffPopulation', 
+        'circle-radius', 
+        makeCircleRadiusStyle(year_current, year_reference, diffMagnify));
+    updatePopulation();
+});
+slider_gridbg_opacity.addEventListener('change', function(){
+    gridbg_opacity = parseFloat(slider_gridbg_opacity.value);
+    map.setPaintProperty(
+        'gridcirclebg', 
+        'circle-opacity', 
+        gridbg_opacity)
+});
+slider_diffMagnify.addEventListener('change', function(){
+    diffMagnify = parseFloat(slider_diffMagnify.value);
+    map.setPaintProperty(
+        'diffPopulation', 
+        'circle-radius', 
+        makeCircleRadiusStyle(year_current, year_reference, diffMagnify));
+});
+slider_allowance.addEventListener('change', function(e){
+    allowance = parseInt(e.target.value, 10) / 100;
+    document.getElementById('allowance-value').textContent = e.target.value;
+    map.setPaintProperty(
+        'gridcirclebg', 
+        'circle-color', 
+        makeCircleColorStyle(year_current, year_reference, allowance));
+    map.setPaintProperty(
+        'diffPopulation', 
+        'circle-color', 
+        makeCircleColorStyle(year_current, year_reference, allowance));
+});
+
+
+function makeCircleColorStyle(ycur, yref, allowance) {
+    if (yref == 'pop0000') {
+        return "#5577AA"
+    } else {
+        let year_diff = ['-', ['number', ['get', ycur]], ['number', ['get', yref]]];
+        let year_diff_rate = ['/', year_diff, ['+', ['number', ['get', yref]], .0001]];
+        return ["case",
+            ['boolean', ['>', year_diff_rate, allowance], true], "#5577AA",
+            ['boolean', ['<', year_diff_rate, -allowance], true], "#AA6655",
+            "#BBBBBB",
+        ];
+    }
+}
+
+function makeCircleRadiusStyle(ycur, yref, magnify) {
+    let year_diff;
+    if (yref == 'pop0000') {
+        year_diff = ['number', ['get', ycur]];
+    } else {
+        year_diff = ['-', ['number', ['get', ycur]], ['number', ['get', yref]]];
+    }
+    let year_diff_abs = ['abs', year_diff];
+    return ['interpolate',  ["exponential", 2] , ['zoom'],
+        8,  ['/', ['sqrt', year_diff_abs], 32   / magnify],
+        17, ['/', ['sqrt', year_diff_abs], 0.25 / magnify] 
+    ]
+}
+
+map.on('load', function() {
+    var vectorTileUrl =  document.location.protocol + "//" + document.location.host + "/tiles/{z}/{x}/{y}.pbf";
+    map.addSource('grid', {
+        "type": 'vector',
+        "tiles": [vectorTileUrl],
+        "minzoom": 5,
+        "maxzoom": 13
+    }); 
+    
+    map.addLayer({
+        'id': 'gridcirclebg',
+        'type': 'circle',
+        'source': 'grid',
+        "source-layer": "popu250grid_stacked",
+        "minzoom": 5,
+        "maxzoom": 18,
+        'paint': {
+            'circle-radius': {
+                stops: [
+                    [8, 1], 
+                    [10, 2], 
+                    [11, 4], 
+                    [12, 8],
+                    [13, 16], 
+                    [14, 32], 
+                    [15, 60],
+                    [16, 128],
+                    [17, 256]
+                ]
+            },
+            'circle-color': makeCircleColorStyle(year_current, year_reference, allowance),
+            'circle-opacity': gridbg_opacity
+        }
+    });
+
+    map.addLayer({
+        'id': 'diffPopulation',
+        'type': 'circle',
+        'source': 'grid',
+        "source-layer": "popu250grid_stacked",
+        "minzoom": 5,
+        "maxzoom": 18,
+        'paint': {
+            'circle-radius': makeCircleRadiusStyle(year_current, year_reference, diffMagnify),
+            'circle-color': makeCircleColorStyle(year_current, year_reference, allowance),
+            'circle-opacity': 0.7
+        }
+    });
+
+    map.on('click', 'gridcirclebg', function (e) {
+        var feature = e.features[0];
+        var coordinates = feature.geometry.coordinates.slice();
+        var properties = Object.keys(feature.properties).map(function (propertyName) {
+            return renderProperty(propertyName, feature.properties[propertyName]);
+        });
+        new mapboxgl.Popup()
+            .setLngLat(coordinates)
+            .setHTML(properties.join(' '))
+            .addTo(map);
+        });
+    
+    map.on('mouseenter', 'gridcirclebg', function () {
+        map.getCanvas().style.cursor = 'pointer';
+    });
+    // Change it back to a pointer when it leaves.
+    map.on('mouseleave', 'gridcirclebg', function () {
+        map.getCanvas().style.cursor = '';
+    });
+
+    // count population change within view
+    map.on('moveend', function () {
+       updatePopulation(); 
+    });
+
+    // map.setLayoutProperty('country-label', 'text-field', ['get', 'name_ko']);
+    // map.setLayoutProperty('state-label', 'text-field', ['get', 'name_ko']);
+    // map.setLayoutProperty('settlement-label', 'text-field', ['get', 'name_ko']);
+    // map.setLayoutProperty('settlement-subdivision-label', 'text-field', ['get', 'name_ko']);
+    map.setLayoutProperty('poi-label', 'text-field', ['get', 'name_ko']);
+    // map.setLayoutProperty('road-label', 'text-field', ['get', 'name_ko']);
+
+});
+
+function updatePopulation() {
+    if (map.getZoom() > 11) {
+        var features = map.queryRenderedFeatures({ layers: ['gridcirclebg'] });
+        if (features) {
+            let uniqueFeatures = getUniqueFeatures(features, 'fid');
+            let popSumCurrent = features.map(item => item.properties[year_current]).reduce((prev, curr) => prev + curr, 0);
+            let popSumReference = 0;
+            if (year_reference != 'pop0000') {
+                popSumReference = features.map(item => item.properties[year_reference]).reduce((prev, curr) => prev + curr, 0);
+            }
+            let popDiff = parseInt(popSumCurrent - popSumReference, 10);
+            let suffix = (popDiff > 0) ? '증가' : '감소';
+            let rate_display = popDiff.toLocaleString() + 
+                ' (' + Math.abs(popDiff/popSumReference*100).toFixed(1) +'% ' + 
+                suffix + ')'
+            if (year_reference == 'pop0000') {
+                rate_display = popDiff.toLocaleString() + '(' +  year_current + ')'
+            }  
+            document.getElementById('mapview-count').textContent = rate_display;
+        }
+    } else {
+        document.getElementById('mapview-count').textContent = '줌인이 필요합니다';
+    }
+}
+
+function getUniqueFeatures(array, comparatorProperty) {
+    var existingFeatureKeys = {};
+    // Because features come from tiled vector data, feature geometries may be split
+    // or duplicated across tile boundaries and, as a result, features may appear
+    // multiple times in query results.
+    var uniqueFeatures = array.filter(function (el) {
+        if (existingFeatureKeys[el.properties[comparatorProperty]]) {
+            return false;
+        } else {
+            existingFeatureKeys[el.properties[comparatorProperty]] = true;
+            return true;
+        }
+    });    
+    return uniqueFeatures;
+}
+
+function renderProperty(propertyName, property) {
+  return '<div class="mbview_property">' +
+    '<div class="mbview_property-name">' + propertyName + '</div>' +
+    '<div class="mbview_property-value">' + displayValue(property) + '</div>' +
+    '</div>';
+}
+function displayValue(value) {
+  if (typeof value === 'undefined' || value === null) return value;
+  if (typeof value === 'number') return Math.round(value).toString();
+  if (typeof value === 'object' ||
+      typeof value === 'string') return value.toString();
+  return value;
+}
+function openNav() {
+  document.getElementById("mySidebar").style.width = "250px";
+  document.getElementById("map").style.marginLeft = "250px";
+}
+
+/* Set the width of the sidebar to 0 and the left margin of the page content to 0 */
+function closeNav() {
+  document.getElementById("mySidebar").style.width = "0";
+  document.getElementById("map").style.marginLeft = "0";
+}
+</script>
+</body>
+</html>

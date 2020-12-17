@@ -1,0 +1,1 @@
+tippecanoe -z15 -Z6 -e tiles -pC -pf -pk -B9 -r1 --force ../data/point/popu250grid_stacked.geojson

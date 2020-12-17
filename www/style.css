@@ -1,0 +1,101 @@
+body { margin: 0; padding: 0; height: 100%;  }
+.sidebar {
+  height: 100%; 
+  width: 0;  
+  position: fixed;
+  z-index: 1; 
+  top: 0;
+  left: 0;
+  overflow-x: hidden; 
+  padding-top: 0px; 
+  transition: 0.5s; 
+}
+#map { 
+	transition: margin-left .5s;
+	top:0;
+	right:0; 
+  	height: 100%; 
+}
+/* The sidebar links */
+.sidebar a {
+  text-decoration: none;
+}
+.sidebar .closebtn {
+	float: right;
+  top: 0;
+  font-size: 36px;
+}
+
+/* The button used to open the sidebar */
+.openbtn {
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* width: 200px; */
+  z-index: 1;
+  font-size: 15px;
+  cursor: pointer;
+  background-color: rgba(15, 15, 15, 0.8);
+  color: white;
+  padding: 10px 10px;
+  text-align: left;
+  border: none;
+}
+
+.openbtn:hover {
+  background-color: #444;
+}
+
+.mapboxgl-popup-content {
+	display: table;
+}
+.mbview_property {
+	display: table-row;
+}
+.mbview_property-value {
+	display: table-cell;
+}
+.mbview_property-name {
+	display: table-cell;
+	padding-right: 10px;
+}
+.map-overlay {
+	font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+	/* position: absolute; */
+	/* width: 200px; */
+	top: 0;
+	left: 0;
+	padding: 5px;
+}
+.map-overlay .map-overlay-inner {
+	background-color: #fff;
+	padding: 5px;
+	margin-bottom: 5px;
+}
+.map-overlay-inner fieldset {
+	border: none;
+	padding: 0;
+	margin: 0 0 10px;
+}
+.map-overlay-inner fieldset:last-child {
+	margin: 10;
+}
+.map-overlay-inner select {
+	width: 100%;
+}
+.map-overlay-inner label {
+	display: block;
+	font-weight: bold;
+	margin: 0 0 5px;
+}
+.map-overlay-inner button {
+	display: inline-block;
+	width: 36px;
+	height: 20px;
+	border: none;
+	cursor: pointer;
+}
+.map-overlay-inner button:focus {
+	outline: none;
+}
+	
