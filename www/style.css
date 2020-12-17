@@ -86,16 +86,7 @@ body { margin: 0; padding: 0; height: 100%;  }
 .map-overlay-inner label {
 	display: block;
 	font-weight: bold;
-	margin: 0 0 5px;
+	margin: 15 0 5px;
 }
-.map-overlay-inner button {
-	display: inline-block;
-	width: 36px;
-	height: 20px;
-	border: none;
-	cursor: pointer;
-}
-.map-overlay-inner button:focus {
-	outline: none;
-}
+
 	
