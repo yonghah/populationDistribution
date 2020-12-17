@@ -55,34 +55,6 @@ rio stack \
 ../data/tiff/popu250grid_stacked.tiff
 ```
 
-분리된 shapefile들을 하나의 격자로 만들기 위해 개별 그리드 shapefile을 각각 geotiff raster로 변환합니다. gdal을 이용하였습니다.
-
-```bash
-gdal_rasterize -tr 250m 250m -a value -a_nodata -1 ../resultShp/popu250grid_2000.shp ../data/tiff/popu250grid_2000.tiff
-gdal_rasterize -tr 250m 250m -a value -a_nodata -1 ../resultShp/popu250grid_2005.shp ../data/tiff/popu250grid_2005.tiff
-gdal_rasterize -tr 250m 250m -a value -a_nodata -1 ../resultShp/popu250grid_2010.shp ../data/tiff/popu250grid_2010.tiff
-gdal_rasterize -tr 250m 250m -a value -a_nodata -1 ../resultShp/popu250grid_2015.shp ../data/tiff/popu250grid_2015.tiff
-gdal_rasterize -tr 250m 250m -a value -a_nodata -1 ../resultShp/popu250grid_2016.shp ../data/tiff/popu250grid_2016.tiff
-gdal_rasterize -tr 250m 250m -a value -a_nodata -1 ../resultShp/popu250grid_2017.shp ../data/tiff/popu250grid_2017.tiff
-gdal_rasterize -tr 250m 250m -a value -a_nodata -1 ../resultShp/popu250grid_2018.shp ../data/tiff/popu250grid_2018.tiff
-gdal_rasterize -tr 250m 250m -a value -a_nodata -1 ../resultShp/popu250grid_2019.shp ../data/tiff/popu250grid_2019.tiff
-```
-
-그리고 이 raster들을 stack하여 각각의 연도가 개별 band인 multiband raster를 만들었습니다.  rasterio를 이용하였습니다.
-
-```bash
-rio stack \
-../data/tiff/popu250grid_2000.tiff \
-../data/tiff/popu250grid_2005.tiff \
-../data/tiff/popu250grid_2010.tiff \
-../data/tiff/popu250grid_2015.tiff \
-../data/tiff/popu250grid_2016.tiff \
-../data/tiff/popu250grid_2017.tiff \
-../data/tiff/popu250grid_2018.tiff \
-../data/tiff/popu250grid_2019.tiff \
-../data/tiff/popu250grid_stacked.tiff
-```
-
 ### raster를 point로 변환
 
 이게 gdal/ogr이나 rasterio로 잘 안되어서 그냥  QGIS 열고 작업했습니다. 
