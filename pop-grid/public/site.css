@@ -1,0 +1,85 @@
+
+body { 
+  margin: 0; 
+  padding: 0; 
+  height: 100%; 
+} 
+.mapContainer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  height: 100%;
+  overflow-y: hidden;
+}
+.sidebarStyle {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.7);
+  color: rgb(19, 19, 19);
+  z-index: 1 !important;
+  padding: 50px 0px 0px 0px; 
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.sidebarStyle fieldset {
+  border-width: 1px;
+  margin: 10px;
+  border-color: #BBB;
+  border-style: solid;
+}
+.sidebarStyle legend {
+  font-size: 13px;
+  font-weight: bold;
+}
+.sidebarStyle label {
+  font-size: 12px;
+  padding: 3px;
+}
+.sidebarStyle p {
+  font-size: 12px;
+  padding-inline-start: 5px;
+  margin: 4px;
+  padding: 4px;
+  color: #888
+}
+.openbtn {
+  position: absolute;
+  top: 0;
+  left: 0px;
+  width: 240px;
+  z-index: 1;
+  font-size: 15px;
+  cursor: pointer;
+  background-color: rgba(8, 8, 8, 0.8);
+  color: white;
+  padding: 10px 10px;
+  text-align: left;
+  border: none;
+}
+.hidden {
+  display: none;
+}
+.popTable {
+  font-size: 11px;
+  padding: 3px;
+}
+.popTable td {
+  padding-left:10px;
+  text-align: right;
+}
+.sidebarStyle .recharts-wrapper {
+  font-size: 8px;
+}
+.popup table {
+  text-align: right;
+  font-size: 11px;
+  line-height: 15px;
+}
+.sidebarStyle a {
+  text-decoration: none;
+}
