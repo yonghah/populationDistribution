@@ -25,6 +25,8 @@ class Application extends React.Component {
       minusColor: "#AA6655",
       grayColor: "#BBBBBB",
       popInView: null,
+      isTerrainOn: false,
+      terrainExaggeration: 2.0,
     };
   }
   mapMoved = (lat, lng, zoom)=>{
@@ -77,6 +79,16 @@ class Application extends React.Component {
   magnifyPopGridChanged = (e)=>{
     this.setState({
       magnifyPopGrid: +e.target.value
+    });
+  }
+  isTerrainOnChanged = (e)=>{
+    this.setState({
+      isTerrainOn: e.target.checked
+    });
+  }
+  terrainExaggerationChanged = (e)=>{
+    this.setState({
+      terrainExaggeration: +e.target.value
     });
   }
   makeGridColorStyle(ycur, yref, allowance, plusColor, minusColor, grayColor) {
@@ -163,6 +175,17 @@ class Application extends React.Component {
             />
           </fieldset>
           <fieldset>
+            <legend> 지형표시</legend> 
+            <TerrainButton
+              isTerrainOn={this.state.isTerrainOn}
+              onChange={this.isTerrainOnChanged}
+            />
+            <TerrainExaggerationSlider
+              terrainExaggeration={this.state.terrainExaggeration}
+              onChange={this.terrainExaggerationChanged}
+            />
+          </fieldset>
+          <fieldset>
             <legend> 바탕 그리드 </legend>
             <OpacityBaseGridSlider 
               opacityBaseGrid={opacityBaseGrid} 
@@ -222,6 +245,8 @@ class Application extends React.Component {
           magnifyPopGrid={magnifyPopGrid} 
           gridColorStyle={colorStyle}
           gridRadiusStyle={radiusStyle}
+          isTerrainOn={this.state.isTerrainOn}
+          terrainExaggeration={this.state.terrainExaggeration}
           onAggregateChange={this.aggregateChanged}
           onMove={this.mapMoved} />
       </div>
@@ -388,7 +413,6 @@ class GrayColorPicker extends React.Component {
 }
 
 
-
 class MagnifyPopGridSlider extends React.Component {
   // constructor(props) {
   //   super(props);
@@ -402,6 +426,40 @@ class MagnifyPopGridSlider extends React.Component {
           type="range" 
           min="0" max="3" step="0.05" 
           value={magnify} 
+          onChange={this.props.onChange} 
+        />
+      </div>
+    );
+  }
+}
+
+
+class TerrainButton extends React.Component {
+  render() {
+    return (
+      <div>
+        <label>지형 켜기</label>
+        <input 
+          type="checkbox" 
+          value="isTerrainOn"
+          onChange={this.props.onChange} 
+        />
+      </div>
+    );
+  }
+}
+
+
+class TerrainExaggerationSlider extends React.Component {
+  render() {
+    const exaggeration = this.props.terrainExaggeration;
+    return (
+      <div>
+        <label>z축 과장: {exaggeration}</label>
+        <input 
+          type="range" 
+          min="0" max="5" step="0.05" 
+          value={exaggeration} 
           onChange={this.props.onChange} 
         />
       </div>
@@ -510,7 +568,8 @@ class Map extends React.Component {
   componentDidMount() {
     this.map = new mapboxgl.Map({
       container: this.mapContainer,
-      style: 'mapbox://styles/yonghah/ckisyamx11efv19o84dvqzosh',   // light 
+      // style: 'mapbox://styles/yonghah/ckisyamx11efv19o84dvqzosh',   // light 
+      style: 'mapbox://styles/yonghah/ckj0x7ras0a9419p8jqrkxf1a',   // monochrometerrain
       center: [this.props.lng, this.props.lat],
       zoom: this.props.zoom
     });
@@ -580,7 +639,6 @@ class Map extends React.Component {
             "<td>" + Math.round(feature.properties[key]) + "</td>" +
             "</tr"
         });
-        console.log(feature.properties);
         new mapboxgl.Popup()
           .setLngLat(coordinates)
           .setHTML(
@@ -596,6 +654,12 @@ class Map extends React.Component {
       map.on('mouseleave', 'baseGrid', function () {
           map.getCanvas().style.cursor = '';
       });
+      map.addSource('mapbox-dem', {
+        'type': 'raster-dem',
+        'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
+        'tileSize': 512,
+        'maxzoom': 18
+        });
     });
   }
   componentDidUpdate(prevProps) {
@@ -615,6 +679,21 @@ class Map extends React.Component {
         'popGrid', 
         'circle-radius', 
         this.props.gridRadiusStyle);
+    }
+    if (this.props.isTerrainOn !== prevProps.isTerrainOn) {
+      const isTerrainOn = this.props.isTerrainOn;
+      this.map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': isTerrainOn? this.props.terrainExaggeration : 0}); 
+      this.map.setLayoutProperty(
+        'satellite', 
+        'visibility', 
+        isTerrainOn? 'visible' : 'none');
+      this.map.setLayoutProperty(
+        'background', 
+        'visibility', 
+        isTerrainOn? 'visible' : 'none');
+    }
+    if (this.props.terrainExaggeration !== prevProps.terrainExaggeration) {
+      this.map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': this.props.terrainExaggeration}); 
     }
     if (this.props.opacityBaseGrid !== prevProps.opacityBaseGrid) {
       this.map.setPaintProperty(
