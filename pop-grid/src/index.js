@@ -5,6 +5,7 @@ import { LineChart, Line, XAxis, YAxis} from 'recharts';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoieW9uZ2hhaCIsImEiOiJjaW52MTNlbnQxM2FtdWttM2loYnljeXNvIn0.chjRTLaOQ6oIaPa0r0Ggnw';
 
+
 class Application extends React.Component {
   constructor(props) {
     super(props);
@@ -414,8 +415,12 @@ class PopInViewDisplay extends React.Component {
   //   super(props);
   // }
   render() {
-    if (this.props.popInView) {
-      const pops = this.props.popInView;
+    if ((this.props.popInView) && (this.props.popInView.length >0)){
+      let pops = this.props.popInView;
+      const popBase = Math.max(pops[0].pop, 1);
+      pops.forEach((pop)=>{
+        pop.popIndex = pop.pop / popBase * 100;
+      });
       let listItems = pops.map((pop)=>{
         return (<tr key={pop.year}> 
           <th >{pop.year} </th> 
@@ -427,7 +432,7 @@ class PopInViewDisplay extends React.Component {
           <LineChart width={170} height={80} data={this.props.popInView}>
             <Line 
               type="monotone" 
-              dataKey="pop" 
+              dataKey="popIndex" 
               dot={{r:2 }}
               stroke="#883322"/>
             <XAxis 
@@ -437,7 +442,7 @@ class PopInViewDisplay extends React.Component {
             />
             <YAxis 
               hide={true}
-              domain={['auto', 'auto']}
+              domain={[0, 'auto']}
             />
           </LineChart>
         <table className='popTable'>
@@ -505,7 +510,7 @@ class Map extends React.Component {
   componentDidMount() {
     this.map = new mapboxgl.Map({
       container: this.mapContainer,
-      style: 'mapbox://styles/yonghah/ckisyamx11efv19o84dvqzosh',
+      style: 'mapbox://styles/yonghah/ckisyamx11efv19o84dvqzosh',   // light 
       center: [this.props.lng, this.props.lat],
       zoom: this.props.zoom
     });
@@ -525,7 +530,6 @@ class Map extends React.Component {
         document.location.protocol + 
         "//" + document.location.host + 
         "/tiles/{z}/{x}/{y}.pbf";
-      // var vectorTileUrl = "http://localhost:3000/tiles/{z}/{x}/{y}.pbf";
       map.addSource('grid', {
         type: 'vector',
         tiles: [vectorTileUrl],
@@ -548,7 +552,9 @@ class Map extends React.Component {
             19, 1024 * this.props.magnifyBaseGrid
           ],
           'circle-opacity': this.props.opacityBaseGrid,
-          'circle-color': this.props.gridColorStyle
+          'circle-color': this.props.gridColorStyle,
+          'circle-pitch-alignment': 'map'
+
         }
       });
       map.addLayer({
@@ -561,7 +567,8 @@ class Map extends React.Component {
         paint: {
           'circle-radius': this.props.gridRadiusStyle,
           'circle-opacity': this.props.opacityPopGrid,
-          'circle-color': this.props.gridColorStyle
+          'circle-color': this.props.gridColorStyle,
+          'circle-pitch-alignment': 'map'
         }
       });
       map.on('click', 'baseGrid', e=> {
