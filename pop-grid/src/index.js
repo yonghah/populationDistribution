@@ -5,6 +5,8 @@ import { LineChart, Line, XAxis, YAxis} from 'recharts';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoieW9uZ2hhaCIsImEiOiJjaW52MTNlbnQxM2FtdWttM2loYnljeXNvIn0.chjRTLaOQ6oIaPa0r0Ggnw';
 
+// eslint-disable-next-line import/no-webpack-loader-syntax
+mapboxgl.workerClass = require('worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker').default;
 
 class Application extends React.Component {
   constructor(props) {
@@ -184,6 +186,7 @@ class Application extends React.Component {
               terrainExaggeration={this.state.terrainExaggeration}
               onChange={this.terrainExaggerationChanged}
             />
+            <p>Ctrl키를 누른채 마우스를 드래그하여 시점 pitch를 변경할 수 있습니다 </p>
           </fieldset>
           <fieldset>
             <legend> 바탕 그리드 </legend>
@@ -455,7 +458,7 @@ class TerrainExaggerationSlider extends React.Component {
     const exaggeration = this.props.terrainExaggeration;
     return (
       <div>
-        <label>z축 과장: {exaggeration}</label>
+        <label>z축 과장: {exaggeration}</label><br/>
         <input 
           type="range" 
           min="0" max="5" step="0.05" 
@@ -659,7 +662,9 @@ class Map extends React.Component {
         'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
         'tileSize': 512,
         'maxzoom': 18
-        });
+      });
+      this.map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 0}); 
+
     });
   }
   componentDidUpdate(prevProps) {
@@ -691,6 +696,36 @@ class Map extends React.Component {
         'background', 
         'visibility', 
         isTerrainOn? 'visible' : 'none');
+      this.map.setLayoutProperty(
+        'settlement-minor-label', 
+        'visibility', 
+        isTerrainOn? 'none' : 'visible');
+      this.map.setLayoutProperty(
+        'poi-label', 
+        'visibility', 
+        isTerrainOn? 'none': 'visible' );
+      this.map.setLayoutProperty(
+        'natural-point-label', 
+        'visibility', 
+        isTerrainOn? 'none' : 'visible');
+      this.map.setPaintProperty(
+        'admin-1-boundary',
+        'line-color', 
+        isTerrainOn? 'rgba(240, 223, 34, .5)' : 'rgba(105, 105, 105, .5)'
+      );
+      this.map.setPaintProperty(
+        'admin-2-boundary',
+        'line-color', 
+        isTerrainOn? 'rgba(240, 223, 34, .5)' : 'rgba(105, 105, 105, .5)'
+      );
+      this.map.setLayoutProperty(
+        'admin-1-boundary-bg', 
+        'visibility', 
+        isTerrainOn? 'none' : 'visible');
+      this.map.setLayoutProperty(
+        'admin-2-boundary-bg', 
+        'visibility', 
+        isTerrainOn? 'none' : 'visible');
     }
     if (this.props.terrainExaggeration !== prevProps.terrainExaggeration) {
       this.map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': this.props.terrainExaggeration}); 
